@@ -16,6 +16,32 @@ public class JpaMain {
         tx.begin();
 
         try{
+            Team team = new Team();
+            team.setName("TeamA");
+            em.persist(team);
+
+            Member member = new Member();
+            member.setUsername("member1");
+            member.setTeam(team);
+            em.persist(member);
+
+            Member member2 = new Member();
+            member2.setUsername("member2");
+            member2.setTeam(team);
+            em.persist(member2);
+
+            em.flush();
+            em.clear();
+
+            Member findMember = em.find(Member.class, member.getId());
+            List<Member> members = findMember.getTeam().getMembers();
+
+            for (Member m : members){
+                System.out.println("member=" + m.getUsername());
+            }
+
+
+
             // JPQL 단순예제
             /*
             // Insert
@@ -44,7 +70,7 @@ public class JpaMain {
                 System.out.println("member.name = " + member.getName());
             }
             */
-            tx.commit();
+
         }catch (Exception e){
             tx.rollback();
         }finally {

@@ -7,24 +7,49 @@ import java.util.Date;
 public class Member {
     @Id
     @GeneratedValue
+    @Column(name="MEMBER_ID")
     private Long id;
-    @Column(name = "name")
+
+    @Column(name = "USERNAME")
     private String username;
 
-    private Integer age;
+    /* DB방식의 연결
+    @Column(name ="TEAM_ID")
+    private Long teamId;
+    */
 
-    @Enumerated(EnumType.STRING)
-    private RoleType roleType;
+    /* Object 방식의 연결 */
+    @ManyToOne
+    @JoinColumn(name="TEAM_ID")
+    private Team team;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdDate;
+    public Long getId() {
+        return id;
+    }
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastModifiedDate;
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    @Lob
-    private String description;
+    public String getUsername() {
+        return username;
+    }
 
-    public Member() {
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
+    }
+
+    //public void setTeam(Team team) {    // 순수 Setter가 아니므로 이름을 바꾸는것도
+    public void changeTeam(Team team){
+        this.team = team;
+        team.getMembers().add(this);  // this는 member를 의미
     }
 }
