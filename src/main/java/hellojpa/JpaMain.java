@@ -25,10 +25,16 @@ public class JpaMain {
             member.setTeam(team);
             em.persist(member);
 
+            Locker locker = new Locker();
+            locker.setName("locker11");
+            em.persist(locker);
+
             Member member2 = new Member();
             member2.setUsername("member2");
             member2.setTeam(team);
+            member2.setLocker(locker);
             em.persist(member2);
+
 
             em.flush();
             em.clear();
@@ -39,8 +45,6 @@ public class JpaMain {
             for (Member m : members){
                 System.out.println("member=" + m.getUsername());
             }
-
-
 
             // JPQL 단순예제
             /*
@@ -70,6 +74,7 @@ public class JpaMain {
                 System.out.println("member.name = " + member.getName());
             }
             */
+            // tx.commit();
 
         }catch (Exception e){
             tx.rollback();
