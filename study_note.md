@@ -327,7 +327,6 @@
   * 참고: 개념적으로 부모를 제거하면 자식은 고아가 된다. 
   * 따라서 고아 객체 제거 기능을 활성화 하면,부모를 제거할 때 자식도 함께제거된다.
   * 이것은 CascadeType.REMOVE처럼 동작한다
-
   
 ## 영속성 전이 + 고아 객체, 생명주기
   * CascadeType.ALL + orphanRemovel=true
@@ -337,5 +336,208 @@
     * 주기를 관리할 수 있음
   * 도메인 주도 설계(DDD)의 Aggregate Root개념을 구현할 때 유용
 
+## JPA의 데이터 타입 분류
+  * 엔티티 타입
+    * @Entity로 정의하는 객체
+    * 데이터가 변해도 식별자로 지속해서 추적 가능
+    * 예) 회원 엔티티의 키나 나이 값을 변경해도 식별자로 인식 가능
+  * 값 타입
+    * int, Integer, String처럼 단순히 값으로 사용하는 자바 기본 타입이나 객체
+    * 식별자가 없고 값만 있으므로 변경시 추적 불가
+    * 예) 숫자 100을 200으로 변경하면 완전히 다른 값으로 대체
 
+## JPA의 데이터 타입 : 값타입
+  * 기본값 타입 : 생명주기를 엔티티에 의존 , 값타입은 공유 X > SideEffect 없음
+    * 자바 기본 타입(int, double)
+    * 래퍼 클래스(Integer, Long)   > 레퍼런스이지만 변경이 안디므로 Side Feect 없음
+    * String
+  * 임베디드 타입(embedded type, 복합 값 타입)
+  * 컬렉션 값 타입(collection value type)
+
+# 임베디드 타입 
+  * 새로운 값 타입을 직접 정의할 수 있음
+  * JPA는 임베디드 타입(embedded type)이라 함
+  * 주로 기본 값 타입을 모아서 만들어서 복합 값 타입이라고도 함
+  * int, String과 같은 값 타입 !!!!
+
+# 임베디드 타입 사용법
+  * @Embeddable: 값 타입을 정의하는 곳에 표시
+  * @Embedded: 값 타입을 사용하는 곳에 표시
+  * 기본 생성자 필수
+  
+# 임베디드 타입의 장점
+  * 재사용 
+  * 높은 응집도
+  * Period.isWork()처럼 해당 값 타입만 사용하는 의미 있는 메소드를 만들 수 있음
+  * 임베디드 타입을 포함한 모든 값 타입은, 값 타입을 소유한 엔티티에 생명주기를 의존함
+
+# 임베디드 타입과 테이블 매핑
+  * 임베디드 타입은 엔티티의 값일 뿐이다.
+  * 임베디드 타입을 사용하기 전과 후에 매핑하는 테이블은 같다.
+  * 객체와 테이블을 아주 세밀하게(find-grained) 매핑하는 것이 가능
+
+# @AttributeOverride: 속성 재정의
+  * 한 엔티티에서 같은 값 타입을 사용하면?
+  * 컬럼 명이 중복됨
+  * @AttributeOverrides, @AttributeOverride를 사용해서 컬러 명 속성을 재정의
+
+# 값 타입과 불변 객체
+  * 값 타입은 복잡한 객체 세상을 조금이라도 단순화하려고 만든 개념이다. 
+  * 따라서 값 타입은 단순하고 안전하게 다룰 수 있어야 한다
+
+# 값 타입 공유 참조
+  * 임베디드 타입 같은 값 타입을 여러 엔티티에서 공유하면 위험함
+  * 부작용(side effect) 발생  -
+
+# 값 타입 복사
+  * 값 타입의 실제 인스턴스인 값을 공유하는 것은 위험
+  * 대신 값(인스턴스)를 복사해서 사용  
+  ```java
+  Address newAdress= new Address (address.getCity(), address.getZipcode()); // 객체를 복사하여 사용
+   
+  ```
+   
+
+# 객체 타입의 한계
+  * 항상 값을 복사해서 사용하면 공유 참조로 인해 발생하는 부작용을 피할 수 있다.
+  * 문제는 임베디드 타입처럼 직접 정의한 값 타입은 자바의 기본타입이 아니라 객체 타입이다.
+  * 자바 기본 타입에 값을 대입하면 값을 복사한다.
+  * 객체 타입은 참조 값을 직접 대입하는 것을 막을 방법이 없다.
+  * 객체의 공유 참조는 피할 수 없다.
+
+  ```java
+  Address a = new Address(“Old”);
+  Address b = a; //객체 타입은 참조를 전달
+  b. setCity(“New”)
+        
+  // 객체 값을 복사하는 방식으로 해야 한다. 
+  Address newAdress= new Address (address.getCity(), address.getZipcode()); // 객체를 복사하여 사용
+  ```
+
+## 불변 객체
+  * 객체 타입을 수정할 수 없게 만들면 부작용을 원천 차단
+  * 값 타입은 불변 객체(immutable object)로 설계해야함
+  * 불변 객체: 생성 시점 이후 절대 값을 변경할 수 없는 객체
+  * 생성자로만 값을 설정하고 수정자(Setter)를 만들지 않으면 됨 !!!!!
+  * 참고: Integer, String은 자바가 제공하는 대표적인 불변 객체
+
+# 값 타입의 비교
+  * 동일성(identity) 비교: 인스턴스의 참조 값을 비교, == 사용
+  * 동등성(equivalence) 비교: 인스턴스의 값을 비교, equals()사용
+  * 값 타입은 a.equals(b)를 사용해서 동등성 비교를 해야 함
+  * 값 타입의 equals() 메소드를 적절하게 재정의(주로 모든 필드사용)
+
+# Immutable Object의 장단점
+  * 장점
+    * 객체에 대한 신뢰도가 높아집니다. 
+    * 객체가 한번 생성되어서 그게 변하지 않는다면 transaction 내에서 그 객체가 변하지 않기에 우리가 믿고 쓸 수 있기 때문입니다.
+    * 생성자, 접근메소드에 대한 방어 복사가 필요없습니다.
+    * 멀티스레드 환경에서 동기화 처리없이 객체를 공유할 수 있습니다.
+  * 단점
+    * 객체가 가지는 값마다 새로운 객체가 필요합니다. 
+    * 따라서 메모리 누수와 새로운 객체를 계속 생성해야하기 때문에 성능저하를 발생시킬 수 있습니다.
+
+# 값 타입 컬렉션
+  * 값 타입을 하나 이상 저장할 때 사용함 
+  * @ElementCollection, @CollectionTable 사용
+  * 데이터베이스는 컬렉션을 같은 테이블에 저장할 수 없다.
+  * 컬렉션을 저장하기 위한 별도의 테이블이 필요함
+  * 라이프 사이클은 Entity를 따라간다. 별도로 persist 할필요 없다. 
+  * 값 타입 컬렉션도 지연 로딩 전략 사용
+  * 값 타입 컬렉션은 영속성 전에(Cascade) + 고아 객체 제거 기능을 필수로 가진다고 볼 수 있다.
+
+# 값 타입 컬렉션의 제약사항
+  * 값 타입은 엔티티와 다르게 식별자 개념이 없다.
+  * 값은 변경하면 추적이 어렵다.
+  * 값 타입 컬렉션에 변경 사항이 발생하면, 주인 엔티티와 연관된 모든 데이터를 삭제하고, 값 타입 컬렉션에 있는 현재 값을 모두 다시 저장한다.
+  * 값 타입 컬렉션을 매핑하는 테이블은 모든 컬럼을 묶어서 기본키를 구성해야 함: null 입력X, 중복 저장X
+
+## 값 타입 컬렉션 대안
+  * 실무에서는 상황에 따라 값 타입 컬렉션 대신에 일대다 관계를고려
+  * 일대다 관계를 위한 엔티티를 만들고, 여기에서 값 타입을 사용
+  * 영속성 전이(Cascade) + 고아 객체 제거를 사용해서 값 타입 컬렉션 처럼 사용
+  * EX) AddressEntity
+
+# 값 타입 컬렉션은 언제 쓰나?
+  * 값 타입은 정말 값 타입이라 판단될 때만 사용 (정말 단순한 값)
+  * 엔티티와 값 타입을 혼동해서 엔티티를 값 타입으로 만들면 안됨
+  * 식별자가 필요하고, 지속해서 값을 추적, 변경해야 한다면 그것은 값 타입이 아닌 엔티티
+
+# 값타입 매핑(실정)
+  * 객체에 @Embeddable 어노테이션  
+  * 필드생성 , 
+  * 필드별 getter setter 생성 ( setter는 private로 )
+  * equals 와 hasCode  Override ( IDE 자동 생성 코드 이용,)
+    * Use getters during code genertaion 체크  
+      * JPA일때는  getter가 아닌 필드 직접 접근하면 문제 될수있다. proxy 사용시 데이터 접근 X
+  * Entity 의  member변수에 @Embedded 로 지정 
+
+# JPA는 다양한 쿼리 방법을 지원
+  * JPQL
+  * JPA Criteria
+  * QueryDSL
+  * 네이티브 SQL
+    * 표준 sql을 벗어나서 , 벤더 종속적인 문법 등을 사용할때 필요하다. 
+  * JDBC API 직접 사용, MyBatis, SpringJdbcTemplate 함께사용
+
+# JPQL ( Java Persistence query language , 객체지향 쿼리 언어 )
+  * JPA를 사용하면 엔티티 객체를 중심으로 개발
+  * 문제는 검색 쿼리
+  * 검색을 할 때도 테이블이 아닌 엔티티 객체를 대상으로 검색
+  * 모든 DB 데이터를 객체로 변환해서 검색하는 것은 불가능
+  * 애플리케이션이 필요한 데이터만 DB에서 불러오려면 결국 검색 조건이 포함된 SQL이 필요
+
+# JPQL #2
+  * JPA는 SQL을 추상화한 JPQL이라는 객체 지향 쿼리 언어 제공
+  * SQL과 문법 유사, SELECT, FROM, WHERE, GROUP BY,HAVING, JOIN 지원
+  * JPQL은 엔티티 객체를 대상으로 쿼리
+  * SQL은 데이터베이스 테이블을 대상으로 쿼리
+
+# JPQL #3
+  * 테이블이 아닌 객체를 대상으로 검색하는 객체 지향 쿼리
+  * SQL을 추상화해서 특정 데이터베이스 SQL에 의존X
+  * JPQL을 한마디로 정의하면 객체 지향 SQL
+
+# Criteria 소개
+  * 문자가 아닌 자바코드로 JPQL을 작성할 수 있음
+  * JPQL 빌더 역할
+  * JPA 공식 기능
+  * 단점: 너무 복잡하고 실용성이 없다.
+  *  Criteria 대신에 QueryDSL 사용 권장
+
+# QueryDSL 소개
+  ```java
+    //JPQL
+    //select m from Member m where m.age > 18
+
+    JPAFactoryQuery query = new JPAQueryFactory(em);
+    QMember m = QMember.member;
+    List<Member> list = 
+        query.selectFrom(m)
+            .where(m.age.gt(18))
+            .orderBy(m.name.desc())
+            .fetch();
+  ```
+# QueryDSL 소개
+  * 문자가 아닌 자바코드로 JPQL을 작성할 수 있음
+  * JPQL 빌더 역할
+  * 컴파일 시점에 문법 오류를 찾을 수 있음
+  * 동적쿼리 작성 편리함
+  * 단순하고 쉬움
+  * 실무 사용 권장
+ 
+# 네이티브 SQL 소개
+  * JPA가 제공하는 SQL을 직접 사용하는 기능
+  * JPQL로 해결할 수 없는 특정 데이터베이스에 의존적인 기능
+  * 예) 오라클 CONNECT BY, 특정 DB만 사용하는 SQL 힌트
+  * 영속성 관리가 됨 ( 쿼리 실행시 flush 됨 )
+  ```java
+    String sql = “SELECT ID, AGE, TEAM_ID, NAME FROM MEMBER WHERE NAME = ‘kim’";
+    List<Member> resultList = em.createNativeQuery(sql, Member.class).getResultList();
+  ```
+
+# JDBC 직접 사용, SpringJdbcTemplate 등
+  * JPA를 사용하면서 JDBC 커넥션을 직접 사용하거나, 스프링 JdbcTemplate, 마이바티스등을 함께 사용 가능
+  * 단 영속성 컨텍스트를 적절한 시점에 강제로 플러시 필요!!!!!
+  * 예) JPA를 우회해서 SQL을 실행하기 직전에 영속성 컨텍스트 수동 플러시
 
