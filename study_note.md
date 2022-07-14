@@ -3,19 +3,22 @@
   * H2 database의 경우 설치한 버젼과 클라이언트 버젼을 맞춘다.
     * pom.xml 최신패키지로 변경 필요 (오류발생) 
 
-# Entity Manager
+# JPA 소개  
+
+## Entity Manager
   * 여러 쓰레드간에서 공유하면 안됨
   * Entity Manger Factory는 하나만 생성해서 애플리케이션 전체에서 공유
   * reqquest 올때마나 Entity Manager를 만든다 
   * JPA 모든 데이터 변경은 Transcation안에서 실행
   * Persistence Manger 1: N Entity Manger  
 
-# JPQL
-  * 테이블이 아닌 객체를 대상으로 검색하는 객체 지향 쿼리
-  * SQL을 추상화해서 특정 데이터베이스 SQL에 의존X
-  * JPQL을 한마디로 정의하면 객체 지향 SQL
+## JPQL
+    * 테이블이 아닌 객체를 대상으로 검색하는 객체 지향 쿼리
+    * SQL을 추상화해서 특정 데이터베이스 SQL에 의존X
+    * JPQL을 한마디로 정의하면 객체 지향 SQL
 
-# Entity Life Cycle  !!! 매우 중요 
+# 영속성 관리 
+## Entity Life Cycle  !!! 매우 중요 
   * new/transient: 비영속 상태 
   * 속성 컨텍스트와 전혀 관계가 없는 새로운 상태
   * managed: 영속 상태   
@@ -59,6 +62,8 @@
     * BLOB, CLOB 매핑
   * @Transient
     * 특정 필드를 컬럼에 매핑하지 않음(매핑 무시)
+    
+# Entity 매핑 
 
 ## Entity 매핑 
   * 객체와 테이블 매핑: @Entity, @Table
@@ -105,6 +110,8 @@
 
 ## Getter /Setter 
   * Setter 보다는 생성자 입력방식이 유지보수에 좋은 의견 ( Setter를 통해 관리가 안되는 Set이 많이 있을수도 )
+
+# 연관관계 
 
 ## 연관관계 매핑시 고려사항 3가지
   * 다중성
@@ -215,7 +222,7 @@
   * @DiscriminatorColumn(name=“DTYPE”)
   * @DiscriminatorValue(“XXX”)
 
-# MappedSuperclass
+## MappedSuperclass
   * @MappedSuperclass
   * DB는 분리되어있지만 객체 입장에서 공통 속성을 분리해서 관리하고 싶을때 사용
   * 상속관계 매핑X
@@ -225,19 +232,20 @@
   * 직접 생성해서 사용할 일이 없으므로 추상 클래스 권장
   * 수정일/수정자/생성일/생성자 같은데 사용하면 유용 
 
-# 실무에서 상속관계를 쓰는가 
+## 실무에서 상속관계를 쓰는가 
   * 복잡도를 관리 하는 비용이 높아짐
     * 데이터가 많아지고 파티셔닝도 들어가고 그러면 복잡한 테이블 구조가 관리가 어려울수도
   * 장점과 단점의 tradeoff를 넘어서는 시점에 시스템을 개비 
 
+# 프록시 
 
-# 프록시 기초
+## 프록시 기초
   * JPA 프록시란/  데이터 베이스 조회를 미루는 가짜 데이터를 제공 하는것 
     * em.find() vs em.getReference()
     * em.find(): 데이터베이스를 통해서 실제 엔티티 객체 조회
     * em.getReference(): 데이터베이스 조회를 미루는 가짜 프록시 객체를 반환 
     * 엔티티 객체 조회
-# 프록시의 특징
+## 프록시의 특징
   * 프록시 객체는 처음 사용할 때 한 번만 초기화
   * 프록시 객체를 초기화 할 때, 프록시 객체가 실제 엔티티로 바뀌는 것은 아님
     * 초기화되면 프록시 객체를 통해서 실제 엔티티에 접근 가능
@@ -336,6 +344,9 @@
     * 주기를 관리할 수 있음
   * 도메인 주도 설계(DDD)의 Aggregate Root개념을 구현할 때 유용
 
+
+# 값타입
+
 ## JPA의 데이터 타입 분류
   * 엔티티 타입
     * @Entity로 정의하는 객체
@@ -354,42 +365,42 @@
   * 임베디드 타입(embedded type, 복합 값 타입)
   * 컬렉션 값 타입(collection value type)
 
-# 임베디드 타입 
+## 임베디드 타입 
   * 새로운 값 타입을 직접 정의할 수 있음
   * JPA는 임베디드 타입(embedded type)이라 함
   * 주로 기본 값 타입을 모아서 만들어서 복합 값 타입이라고도 함
   * int, String과 같은 값 타입 !!!!
 
-# 임베디드 타입 사용법
+## 임베디드 타입 사용법
   * @Embeddable: 값 타입을 정의하는 곳에 표시
   * @Embedded: 값 타입을 사용하는 곳에 표시
   * 기본 생성자 필수
   
-# 임베디드 타입의 장점
+## 임베디드 타입의 장점
   * 재사용 
   * 높은 응집도
   * Period.isWork()처럼 해당 값 타입만 사용하는 의미 있는 메소드를 만들 수 있음
   * 임베디드 타입을 포함한 모든 값 타입은, 값 타입을 소유한 엔티티에 생명주기를 의존함
 
-# 임베디드 타입과 테이블 매핑
+## 임베디드 타입과 테이블 매핑
   * 임베디드 타입은 엔티티의 값일 뿐이다.
   * 임베디드 타입을 사용하기 전과 후에 매핑하는 테이블은 같다.
   * 객체와 테이블을 아주 세밀하게(find-grained) 매핑하는 것이 가능
 
-# @AttributeOverride: 속성 재정의
+## @AttributeOverride: 속성 재정의
   * 한 엔티티에서 같은 값 타입을 사용하면?
   * 컬럼 명이 중복됨
   * @AttributeOverrides, @AttributeOverride를 사용해서 컬러 명 속성을 재정의
 
-# 값 타입과 불변 객체
+## 값 타입과 불변 객체
   * 값 타입은 복잡한 객체 세상을 조금이라도 단순화하려고 만든 개념이다. 
   * 따라서 값 타입은 단순하고 안전하게 다룰 수 있어야 한다
 
-# 값 타입 공유 참조
+## 값 타입 공유 참조
   * 임베디드 타입 같은 값 타입을 여러 엔티티에서 공유하면 위험함
   * 부작용(side effect) 발생  -
 
-# 값 타입 복사
+## 값 타입 복사
   * 값 타입의 실제 인스턴스인 값을 공유하는 것은 위험
   * 대신 값(인스턴스)를 복사해서 사용  
   ```java
@@ -398,7 +409,7 @@
   ```
    
 
-# 객체 타입의 한계
+## 객체 타입의 한계
   * 항상 값을 복사해서 사용하면 공유 참조로 인해 발생하는 부작용을 피할 수 있다.
   * 문제는 임베디드 타입처럼 직접 정의한 값 타입은 자바의 기본타입이 아니라 객체 타입이다.
   * 자바 기본 타입에 값을 대입하면 값을 복사한다.
@@ -421,13 +432,13 @@
   * 생성자로만 값을 설정하고 수정자(Setter)를 만들지 않으면 됨 !!!!!
   * 참고: Integer, String은 자바가 제공하는 대표적인 불변 객체
 
-# 값 타입의 비교
+## 값 타입의 비교
   * 동일성(identity) 비교: 인스턴스의 참조 값을 비교, == 사용
   * 동등성(equivalence) 비교: 인스턴스의 값을 비교, equals()사용
   * 값 타입은 a.equals(b)를 사용해서 동등성 비교를 해야 함
   * 값 타입의 equals() 메소드를 적절하게 재정의(주로 모든 필드사용)
 
-# Immutable Object의 장단점
+## Immutable Object의 장단점1
   * 장점
     * 객체에 대한 신뢰도가 높아집니다. 
     * 객체가 한번 생성되어서 그게 변하지 않는다면 transaction 내에서 그 객체가 변하지 않기에 우리가 믿고 쓸 수 있기 때문입니다.
@@ -437,7 +448,7 @@
     * 객체가 가지는 값마다 새로운 객체가 필요합니다. 
     * 따라서 메모리 누수와 새로운 객체를 계속 생성해야하기 때문에 성능저하를 발생시킬 수 있습니다.
 
-# 값 타입 컬렉션
+## 값 타입 컬렉션
   * 값 타입을 하나 이상 저장할 때 사용함 
   * @ElementCollection, @CollectionTable 사용
   * 데이터베이스는 컬렉션을 같은 테이블에 저장할 수 없다.
@@ -446,7 +457,7 @@
   * 값 타입 컬렉션도 지연 로딩 전략 사용
   * 값 타입 컬렉션은 영속성 전에(Cascade) + 고아 객체 제거 기능을 필수로 가진다고 볼 수 있다.
 
-# 값 타입 컬렉션의 제약사항
+## 값 타입 컬렉션의 제약사항
   * 값 타입은 엔티티와 다르게 식별자 개념이 없다.
   * 값은 변경하면 추적이 어렵다.
   * 값 타입 컬렉션에 변경 사항이 발생하면, 주인 엔티티와 연관된 모든 데이터를 삭제하고, 값 타입 컬렉션에 있는 현재 값을 모두 다시 저장한다.
@@ -458,12 +469,12 @@
   * 영속성 전이(Cascade) + 고아 객체 제거를 사용해서 값 타입 컬렉션 처럼 사용
   * EX) AddressEntity
 
-# 값 타입 컬렉션은 언제 쓰나?
+## 값 타입 컬렉션은 언제 쓰나?
   * 값 타입은 정말 값 타입이라 판단될 때만 사용 (정말 단순한 값)
   * 엔티티와 값 타입을 혼동해서 엔티티를 값 타입으로 만들면 안됨
   * 식별자가 필요하고, 지속해서 값을 추적, 변경해야 한다면 그것은 값 타입이 아닌 엔티티
 
-# 값타입 매핑(실정)
+## 값타입 매핑(실정)
   * 객체에 @Embeddable 어노테이션  
   * 필드생성 , 
   * 필드별 getter setter 생성 ( setter는 private로 )
@@ -472,7 +483,9 @@
       * JPA일때는  getter가 아닌 필드 직접 접근하면 문제 될수있다. proxy 사용시 데이터 접근 X
   * Entity 의  member변수에 @Embedded 로 지정 
 
-# JPA는 다양한 쿼리 방법을 지원
+# 객체지향 쿼리언어 
+
+## JPA는 다양한 쿼리 방법을 지원
   * JPQL
   * JPA Criteria
   * QueryDSL
@@ -480,32 +493,32 @@
     * 표준 sql을 벗어나서 , 벤더 종속적인 문법 등을 사용할때 필요하다. 
   * JDBC API 직접 사용, MyBatis, SpringJdbcTemplate 함께사용
 
-# JPQL ( Java Persistence query language , 객체지향 쿼리 언어 )
+## JPQL ( Java Persistence query language , 객체지향 쿼리 언어 )
   * JPA를 사용하면 엔티티 객체를 중심으로 개발
   * 문제는 검색 쿼리
   * 검색을 할 때도 테이블이 아닌 엔티티 객체를 대상으로 검색
   * 모든 DB 데이터를 객체로 변환해서 검색하는 것은 불가능
   * 애플리케이션이 필요한 데이터만 DB에서 불러오려면 결국 검색 조건이 포함된 SQL이 필요
 
-# JPQL #2
+## JPQL #2
   * JPA는 SQL을 추상화한 JPQL이라는 객체 지향 쿼리 언어 제공
   * SQL과 문법 유사, SELECT, FROM, WHERE, GROUP BY,HAVING, JOIN 지원
   * JPQL은 엔티티 객체를 대상으로 쿼리
   * SQL은 데이터베이스 테이블을 대상으로 쿼리
 
-# JPQL #3
+## JPQL #3
   * 테이블이 아닌 객체를 대상으로 검색하는 객체 지향 쿼리
   * SQL을 추상화해서 특정 데이터베이스 SQL에 의존X
   * JPQL을 한마디로 정의하면 객체 지향 SQL
 
-# Criteria 소개
+## Criteria 소개
   * 문자가 아닌 자바코드로 JPQL을 작성할 수 있음
   * JPQL 빌더 역할
   * JPA 공식 기능
   * 단점: 너무 복잡하고 실용성이 없다.
   *  Criteria 대신에 QueryDSL 사용 권장
 
-# QueryDSL 소개
+## QueryDSL 소개
   ```java
     //JPQL
     //select m from Member m where m.age > 18
@@ -518,7 +531,7 @@
             .orderBy(m.name.desc())
             .fetch();
   ```
-# QueryDSL 소개
+## QueryDSL 소개
   * 문자가 아닌 자바코드로 JPQL을 작성할 수 있음
   * JPQL 빌더 역할
   * 컴파일 시점에 문법 오류를 찾을 수 있음
@@ -526,7 +539,7 @@
   * 단순하고 쉬움
   * 실무 사용 권장
  
-# 네이티브 SQL 소개
+## 네이티브 SQL 소개
   * JPA가 제공하는 SQL을 직접 사용하는 기능
   * JPQL로 해결할 수 없는 특정 데이터베이스에 의존적인 기능
   * 예) 오라클 CONNECT BY, 특정 DB만 사용하는 SQL 힌트
@@ -536,19 +549,19 @@
     List<Member> resultList = em.createNativeQuery(sql, Member.class).getResultList();
   ```
 
-# JDBC 직접 사용, SpringJdbcTemplate 등
+## JDBC 직접 사용, SpringJdbcTemplate 등
   * JPA를 사용하면서 JDBC 커넥션을 직접 사용하거나, 스프링 JdbcTemplate, 마이바티스등을 함께 사용 가능
   * 단 영속성 컨텍스트를 적절한 시점에 강제로 플러시 필요!!!!!
   * 예) JPA를 우회해서 SQL을 실행하기 직전에 영속성 컨텍스트 수동 플러시
 
 
 
-# JPQL 소개
+## JPQL 소개
   * JPQL은 객체지향 쿼리 언어다.따라서 테이블을 대상으로 쿼리하는 것이 아니라 엔티티 객체를 대상으로 쿼리한다.
   * JPQL은 SQL을 추상화해서 특정데이터베이스 SQL에 의존하지 않는다.
   * JPQL은 결국 SQL로 변환된다
 
-# JPQL 문법
+## JPQL 문법
   ```code
   select_문 :: =
     select_절
@@ -562,7 +575,7 @@
   delete_문 :: = delete_절 [where_절] 
   ```
 
-# JPQL 문법
+## JPQL 문법
   * select m from Member as m where m.age > 18
   * 엔티티와 속성은 대소문자 구분O (Member, age)
   * JPQL 키워드는 대소문자 구분X (SELECT, FROM, where)
@@ -579,7 +592,7 @@
     MIN(m.age) //최소 나이
     from Member m
   ```
-# TypeQuery, Query
+## TypeQuery, Query
   * TypeQuery: 반환 타입이 명확할 때 사용
     ```java
         TypedQuery<Member> query = em.createQuery("SELECT m FROM Member m", Member.class);
@@ -589,7 +602,7 @@
       Query query = em.createQuery("SELECT m.username, m.age from Member m");
     ```
 
-# 결과 조회 API
+## 결과 조회 API
   * query.getResultList(): 결과가 하나 이상일 때 (컬렉션일때 ) , 리스트 반환
     * 결과가 없으면 빈 리스트 반환
   * query.getSingleResult(): 결과가 정확히 하나, 단일 객체 반환
@@ -597,7 +610,7 @@
       * Spring Data JPA에서는 불편한 부분이라 Exception을 발생시키지 않고  null or Option을 반환한다. 
     * 둘 이상이면: javax.persistence.NonUniqueResultException
 
-# 파라미터 바인딩 - 이름 기준, 위치 기준
+## 파라미터 바인딩 - 이름 기준, 위치 기준
    ```code
   SELECT m FROM Member m where m.username=:username
   query.setParameter("username", usernameParam);
@@ -607,7 +620,7 @@
   SELECT m FROM Member m where m.username=?1
   query.setParameter(1, usernameParam);
   ```
-# 프로젝션
+## 프로젝션
   * SELECT 절에 조회할 대상을 지정하는 것
   * 프로젝션 대상: 엔티티, 임베디드 타입, 스칼라 타입(숫자, 문자등 기본 데이터 타입)
   * SELECT m FROM Member m -> 엔티티 프로젝션
@@ -617,7 +630,7 @@
   * DISTINCT로 중복 제거
 
 
-# 프로젝션 - 여러 값 조회
+## 프로젝션 - 여러 값 조회
   * SELECT m.username, m.age FROM Member m   // 이와같이 다양한 타입으로 가져와야 할때는 
   * 1. Query 타입으로 조회
   * 2. Object[] 타입으로 조회
@@ -627,7 +640,7 @@
     * 패키지 명을 포함한 전체 클래스 명 입력
     * 순서와 타입이 일치하는 생성자 필요
 
-# 페이징 API
+## 페이징 API
   * JPA는 페이징을 다음 두 API로 추상화
   * setFirstResult(int startPosition) : 조회 시작 위치 (0부터 시작)
   * setMaxResults(int maxResult) : 조회할 데이터 수
@@ -641,7 +654,7 @@
         .getResultList();
   ```
 
-# 조인
+## 조인
   * 내부 조인:
     * SELECT m FROM Member m [INNER] JOIN m.team t
   * 외부 조인:
@@ -649,12 +662,12 @@
   * 세타 조인:
     * select count(m) from Member m, Team t where m.username = t.name
 
-# 조인 - ON 절
+## 조인 - ON 절
   * ON절을 활용한 조인(JPA 2.1부터 지원)
     * 1 조인 대상 필터링
     * 2 연관관계 없는 엔티티 외부 조인(하이버네이트 5.1부터)
 
-# 조인 대상 필터링
+## 조인 대상 필터링
   * 예) 회원과 팀을 조인하면서, 팀 이름이 A인 팀만 조인
   ``` sql 
    -- JPQL:
@@ -663,7 +676,7 @@
    SELECT m.*, t.* FROM 
    Member m LEFT JOIN Team t ON m.TEAM_ID=t.id and t.name='A' 
   ```
-# 연관관계 없는 엔티티 외부 조인
+## 연관관계 없는 엔티티 외부 조인
    * 예) 회원의 이름과 팀의 이름이 같은 대상 외부 조인
    * 아래는 username은 연관관계가 정의되어있지 않음에도join 가능 
 ```jsql
@@ -675,7 +688,7 @@
    Member m LEFT JOIN Team t ON m.username = t.name
 ```
 
-# 서브 쿼리
+## 서브 쿼리
   * 나이가 평균보다 많은 회원 
    select m from Member m
    where m.age > (select avg(m2.age) from Member m2)
@@ -683,3 +696,92 @@
   * 한 건이라도 주문한 고객
    select m from Member m
    where (select count(o) from Order o where m = o.member) > 0
+
+
+## 서브 쿼리 지원 함수
+  * [NOT] EXISTS (subquery): 서브쿼리에 결과가 존재하면 참
+    * {ALL | ANY | SOME} (subquery)
+    * ALL 모두 만족하면 참
+    * ANY, SOME: 같은 의미, 조건을 하나라도 만족하면 참
+  * [NOT] IN (subquery): 서브쿼리의 결과 중 하나라도 같은 것이 있으면 참
+
+## JPA 서브 쿼리 한계
+  * JPA는 WHERE, HAVING 절에서만 서브 쿼리 사용 가능
+  * SELECT 절도 가능(하이버네이트에서 지원)
+  * FROM 절의 서브 쿼리는 현재 JPQL에서 불가능
+  * 조인으로 풀 수 있으면 풀어서 해결
+
+## JPQL 타입 표현
+  * 문자: ‘HELLO’, ‘She’’s’
+  * 숫자: 10L(Long), 10D(Double), 10F(Float)
+  * Boolean: TRUE, FALSE
+  * ENUM: jpabook.MemberType.Admin (패키지명 포함)
+  * 엔티티 타입: TYPE(m) = Member (상속 관계에서 사용
+
+## JPQL 기타
+  * SQL과 문법이 같은 식
+  * EXISTS, IN
+  * AND, OR, NOT
+  * =, >, >=, <, <=, <>
+  * BETWEEN, LIKE, IS NULL
+
+
+## 조건식 - CASE 식
+  * 기본 case식 
+    ```jpaql
+    select
+        case 
+           when m.age <=12 then '학생요금'
+           when m.age <=16 then '경로요금'
+           else '일반요금'
+        end
+    from Member m
+    ``` 
+  * 단순 case식
+      ```jpaql
+      select
+        case t.name
+          when '팀A' then '인센티브110%'
+          when '팀B' then '인센티브120%'
+          else '인센티브105%'
+        end
+      from Team t
+     ```
+## 조건식 -COALESCE, NULLIF
+  * COALESCE: 하나씩 조회해서 null이 아니면 반환
+  * NULLIF: 두 값이 같으면 null 반환, 다르면 첫번째 값 반환
+  * 사용자 이름이 없으면 이름없는 회원 반환
+    ```jpaql
+      select coalesce(m.username,'이름 없는 회원') from Member m
+    ```
+  * 사용자 이름이 관리자면 null을 반환하고 아니면 본인의 이름 반환
+    ```jpaql
+    * select NULLIF(m.username, '관리자') from Member m
+    ```
+
+## JPQL 기본 함수
+  * 표준함수  (DB에 관ㅖ없이 사용 가능)
+    * CONCAT
+    * SUBSTRING
+    * TRIM
+    * LOWER, UPPER
+    * LENGTH
+    * LOCATE
+    * ABS, SQRT, MOD
+    * SIZE
+    * INDEX(JPA 용도 - @OrderColumn 사용시 사용 ) // 비추 
+  * 사용자 정의 함수 호출
+    * 하이버네이트는 사용전 방언에 추가해야 한다.
+    * 사용하는 DB 방언을 상속받고, 사용자 정의 함수를 등록한다.
+      ``` jpaql
+      function('group_concat', i.name) from Item i
+      ```
+## 경로 표현식
+  * .(점)을 찍어 객체 그래프를 탐색하는 것
+  ``` jpaql
+    select m.username -> 상태 필드
+        from Member m
+        join m.team t -> 단일 값 연관 필드
+        join m.orders o -> 컬렉션 값 연관 필드
+       where t.name = '팀A'
+  ```
